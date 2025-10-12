@@ -32,11 +32,14 @@ endif()
 project(fastdds VERSION "3.4.0.0" LANGUAGES C CXX)
 
 set(PROJECT_NAME_LARGE "Fast DDS")
+
+set(CMAKE_PREFIX_PATH "/Volumes/Samsung990/eProsima/install")
+set(CMAKE_INSTALL_PREFIX "/Volumes/Samsung990/eProsima/install")
 string(TOUPPER "${PROJECT_NAME}" PROJECT_NAME_UPPER)
 
 message(STATUS "Version: ${PROJECT_VERSION}")
 
-set(FASTDDS_BASIC_DIR ${PROJECT_SOURCE_DIR})
+set(FASTDDS_BASIC_DIR ${PROJECT_SOURCE_DIR}) 
 
 ###############################################################################
 # eProsima build options
