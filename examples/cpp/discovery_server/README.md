@@ -17,6 +17,29 @@ The publisher and subscriber entities are discovery server clients designed to s
 A server can also act as a client of another server, allowing the creation of a network of servers that can be used to distribute the discovery information among them.
 For further information about discovery server, please refer to the [Discovery Server documentation](https://fast-dds.docs.eprosima.com/en/latest/fastdds/discovery/discovery_server.html).
 
+
+                          消息分发的两个阶段                            
+
+【阶段 1: 发现阶段】 - 使用中间服务器
+    
+    Publisher                Discovery Server              Subscriber
+       │                            │                          │
+       │──① 连接 Server ──────────→ │                          │
+       │                            │ ←──② 连接 Server ────────│
+       │                            │                          │
+       │                      ③ Server 维护                    │
+       │                    所有 Participants 信息             │
+       │                            │                          │
+       │←─④ 通知有 Subscriber ──────│──⑤ 通知有 Publisher ───→│
+       │                            │                          │
+
+【阶段 2: 数据传输阶段】 - 底层 RTPS 自动实现
+
+    Publisher                                              Subscriber
+       │                                                      │
+       │──────⑥ 直接发送数据 (通过 RTPS) ──────────────────→│
+       │          (不经过 Discovery Server!)                 │
+
 ## Run the example
 
 To launch this example, three different terminals are required.

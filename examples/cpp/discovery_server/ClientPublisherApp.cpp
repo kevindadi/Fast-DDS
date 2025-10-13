@@ -20,6 +20,7 @@
 #include "ClientPublisherApp.hpp"
 
 #include <condition_variable>
+#include <fstream>
 #include <stdexcept>
 
 #include <fastdds/dds/domain/DomainParticipantFactory.hpp>
@@ -197,16 +198,29 @@ ClientPublisherApp::ClientPublisherApp(
     // and the suscription is not prepared yet
     wqos.history().depth = 5;
 
+    // Hot update support: Ownership QoS
+    wqos.ownership().kind = EXCLUSIVE_OWNERSHIP_QOS;
+    // Set ownership strength (can be overridden via environment variable)
+    const char* strength_env = std::getenv("PUBLISHER_STRENGTH");
+    int strength = strength_env ? std::atoi(strength_env) : 10;
+    wqos.ownership_strength().value = strength;
+
     writer_ = publisher_->create_datawriter(topic_, wqos, this);
 
     if (writer_ == nullptr)
     {
         throw std::runtime_error("DataWriter initialization failed");
     }
+
+    // Load previous state for hot update
+    load_state();
 }
 
 ClientPublisherApp::~ClientPublisherApp()
 {
+    // Save state before shutdown
+    save_state();
+
     if (nullptr != participant_)
     {
         // Delete DDS entities contained within the DomainParticipant
@@ -296,6 +310,84 @@ void ClientPublisherApp::stop()
 {
     stop_.store(true);
     cv_.notify_one();
+}
+
+void ClientPublisherApp::graceful_shutdown()
+{
+    std::cout << "[Hot Update] Starting graceful shutdown..." << std::endl;
+    
+    // 1. Stop sending new messages
+    stop();
+    
+    // 2. Wait for all sent messages to be acknowledged
+    if (writer_ != nullptr)
+    {
+        std::cout << "[Hot Update] Waiting for acknowledgments..." << std::endl;
+        dds::Duration_t timeout{10, 0};  // 10 seconds timeout
+        ReturnCode_t ret = writer_->wait_for_acknowledgments(timeout);
+        
+        if (ret == RETCODE_OK)
+        {
+            std::cout << "[Hot Update] All messages acknowledged" << std::endl;
+        }
+        else
+        {
+            std::cout << "[Hot Update] Warning: Some messages may not be acknowledged" << std::endl;
+        }
+    }
+    
+    // 3. Save current state
+    save_state();
+    
+    std::cout << "[Hot Update] Graceful shutdown complete. Last index: " 
+              << hello_.index() << std::endl;
+}
+
+void ClientPublisherApp::save_state()
+{
+    std::ofstream ofs(state_file_);
+    if (ofs.is_open())
+    {
+        ofs << "last_index=" << hello_.index() << std::endl;
+        ofs << "timestamp=" << std::time(nullptr) << std::endl;
+        ofs.close();
+        std::cout << "[Hot Update] State saved to " << state_file_ << std::endl;
+    }
+}
+
+void ClientPublisherApp::load_state()
+{
+    std::ifstream ifs(state_file_);
+    if (ifs.is_open())
+    {
+        std::string line;
+        uint32_t last_index = 0;
+        
+        while (std::getline(ifs, line))
+        {
+            if (line.find("last_index=") == 0)
+            {
+                last_index = std::stoul(line.substr(11));
+            }
+        }
+        
+        if (last_index > 0)
+        {
+            hello_.index(last_index);
+            std::cout << "[Hot Update] State restored. Continuing from index " 
+                      << last_index << std::endl;
+        }
+        else
+        {
+            std::cout << "[Hot Update] No previous state found. Starting from index 0" << std::endl;
+        }
+        
+        ifs.close();
+    }
+    else
+    {
+        std::cout << "[Hot Update] No state file found. Starting from index 0" << std::endl;
+    }
 }
 
 } // namespace discovery_server

@@ -45,16 +45,49 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 message(STATUS "Configuring discovery server example...")
-file(GLOB DISCOVERY_SERVER_SOURCES_CXX "*.cxx")
-file(GLOB DISCOVERY_SERVER_SOURCES_CPP "*.cpp")
 
-add_executable(discovery_server ${DISCOVERY_SERVER_SOURCES_CXX} ${DISCOVERY_SERVER_SOURCES_CPP})
-target_compile_definitions(discovery_server PRIVATE
-    $<$<AND:$<NOT:$<BOOL:${WIN32}>>,$<STREQUAL:"${CMAKE_BUILD_TYPE}","Debug">>:__DEBUG>
-    $<$<BOOL:${INTERNAL_DEBUG}>:__INTERNALDEBUG> # Internal debug activated.
-    $<$<BOOL:${SHM_TRANSPORT_DEFAULT}>:SHM_TRANSPORT_BUILTIN> # Enable SHM as built-in transport
+# 共享源文件（不包括 main.cpp 和 Application.cpp）
+file(GLOB DISCOVERY_SERVER_SOURCES_CXX "*.cxx")
+set(COMMON_SOURCES
+    ClientPublisherApp.cpp
+    ClientSubscriberApp.cpp
+    ServerApp.cpp
+    ${DISCOVERY_SERVER_SOURCES_CXX}
 )
-target_link_libraries(discovery_server fastdds fastcdr)
-install(TARGETS discovery_server
+
+# 1. Publisher 
+add_executable(ds_publisher main.cpp ${COMMON_SOURCES})
+target_compile_definitions(ds_publisher PRIVATE
+    ENTITY_PUBLISHER
+    $<$<AND:$<NOT:$<BOOL:${WIN32}>>,$<STREQUAL:"${CMAKE_BUILD_TYPE}","Debug">>:__DEBUG>
+    $<$<BOOL:${INTERNAL_DEBUG}>:__INTERNALDEBUG>
+    $<$<BOOL:${SHM_TRANSPORT_DEFAULT}>:SHM_TRANSPORT_BUILTIN>
+)
+target_link_libraries(ds_publisher fastdds fastcdr)
+install(TARGETS ds_publisher
+    RUNTIME DESTINATION ${DATA_INSTALL_DIR}/fastdds/examples/cpp/discovery_server/${BIN_INSTALL_DIR})
+
+# 2. Subscriber 
+add_executable(ds_subscriber main.cpp ${COMMON_SOURCES})
+target_compile_definitions(ds_subscriber PRIVATE
+    ENTITY_SUBSCRIBER
+    $<$<AND:$<NOT:$<BOOL:${WIN32}>>,$<STREQUAL:"${CMAKE_BUILD_TYPE}","Debug">>:__DEBUG>
+    $<$<BOOL:${INTERNAL_DEBUG}>:__INTERNALDEBUG>
+    $<$<BOOL:${SHM_TRANSPORT_DEFAULT}>:SHM_TRANSPORT_BUILTIN>
+)
+target_link_libraries(ds_subscriber fastdds fastcdr)
+install(TARGETS ds_subscriber
+    RUNTIME DESTINATION ${DATA_INSTALL_DIR}/fastdds/examples/cpp/discovery_server/${BIN_INSTALL_DIR})
+
+# 3. Discovery Server 
+add_executable(ds_server main.cpp ${COMMON_SOURCES})
+target_compile_definitions(ds_server PRIVATE
+    ENTITY_SERVER
+    $<$<AND:$<NOT:$<BOOL:${WIN32}>>,$<STREQUAL:"${CMAKE_BUILD_TYPE}","Debug">>:__DEBUG>
+    $<$<BOOL:${INTERNAL_DEBUG}>:__INTERNALDEBUG>
+    $<$<BOOL:${SHM_TRANSPORT_DEFAULT}>:SHM_TRANSPORT_BUILTIN>
+)
+target_link_libraries(ds_server fastdds fastcdr)
+install(TARGETS ds_server
     RUNTIME DESTINATION ${DATA_INSTALL_DIR}/fastdds/examples/cpp/discovery_server/${BIN_INSTALL_DIR})
 

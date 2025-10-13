@@ -197,6 +197,10 @@ ClientSubscriberApp::ClientSubscriberApp(
         rqos.durability().kind = TRANSIENT_LOCAL_DURABILITY_QOS;
     }
 
+    // Hot update support: Ownership QoS
+    // Subscriber uses EXCLUSIVE to receive only from highest strength Publisher
+    rqos.ownership().kind = EXCLUSIVE_OWNERSHIP_QOS;
+
     reader_ = subscriber_->create_datareader(topic_, rqos, this);
 
     if (reader_ == nullptr)

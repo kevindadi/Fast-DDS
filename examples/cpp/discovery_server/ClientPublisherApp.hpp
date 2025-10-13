@@ -57,6 +57,15 @@ public:
     //! Stop publisher
     void stop() override;
 
+    //! Graceful shutdown for hot update
+    void graceful_shutdown();
+
+    //! Save current state to file
+    void save_state();
+
+    //! Load state from file
+    void load_state();
+
 private:
 
     //! Return the current state of execution
@@ -66,6 +75,8 @@ private:
     bool publish();
 
     HelloWorld hello_;
+    
+    std::string state_file_{"/tmp/fastdds_publisher_state.txt"};
 
     DomainParticipant* participant_;
 

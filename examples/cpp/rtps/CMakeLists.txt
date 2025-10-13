@@ -15,6 +15,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(fastdds_rtps_example VERSION 1 LANGUAGES CXX)
+set(CMAKE_PREFIX_PATH "/Volumes/Samsung990/eProsima/install")
 
 # Find requirements
 if(NOT fastcdr_FOUND)

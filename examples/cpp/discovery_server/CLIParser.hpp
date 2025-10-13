@@ -627,6 +627,72 @@ public:
     }
 
     /**
+     * @brief Parse command line options for Publisher only
+     */
+    static client_publisher_config parse_publisher_options(
+            int argc,
+            char* argv[])
+    {
+        // 创建临时的 argv，在开头插入 "publisher"
+        char** new_argv = new char*[argc + 1];
+        new_argv[0] = argv[0];
+        new_argv[1] = const_cast<char*>("publisher");
+        for (int i = 1; i < argc; ++i)
+        {
+            new_argv[i + 1] = argv[i];
+        }
+        
+        ds_example_config config = parse_cli_options(argc + 1, new_argv);
+        delete[] new_argv;
+        
+        return config.pub_config;
+    }
+
+    /**
+     * @brief Parse command line options for Subscriber only
+     */
+    static client_subscriber_config parse_subscriber_options(
+            int argc,
+            char* argv[])
+    {
+        // 创建临时的 argv，在开头插入 "subscriber"
+        char** new_argv = new char*[argc + 1];
+        new_argv[0] = argv[0];
+        new_argv[1] = const_cast<char*>("subscriber");
+        for (int i = 1; i < argc; ++i)
+        {
+            new_argv[i + 1] = argv[i];
+        }
+        
+        ds_example_config config = parse_cli_options(argc + 1, new_argv);
+        delete[] new_argv;
+        
+        return config.sub_config;
+    }
+
+    /**
+     * @brief Parse command line options for Server only
+     */
+    static server_config parse_server_options(
+            int argc,
+            char* argv[])
+    {
+        // 创建临时的 argv，在开头插入 "server"
+        char** new_argv = new char*[argc + 1];
+        new_argv[0] = argv[0];
+        new_argv[1] = const_cast<char*>("server");
+        for (int i = 1; i < argc; ++i)
+        {
+            new_argv[i + 1] = argv[i];
+        }
+        
+        ds_example_config config = parse_cli_options(argc + 1, new_argv);
+        delete[] new_argv;
+        
+        return config.srv_config;
+    }
+
+    /**
      * @brief Parse the signal number into the signal name
      *
      * @param signum signal number
