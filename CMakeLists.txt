@@ -454,7 +454,7 @@ add_subdirectory(test)
 ###############################################################################
 # Examples
 ###############################################################################
-option(COMPILE_EXAMPLES "Build example" OFF)
+option(COMPILE_EXAMPLES "Build example" ON)
 
 if(EPROSIMA_BUILD)
     set(COMPILE_EXAMPLES ON)

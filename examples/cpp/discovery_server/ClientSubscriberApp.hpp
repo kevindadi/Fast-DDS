@@ -41,10 +41,10 @@ class ClientSubscriberApp : public Application,  public DataReaderListener
 {
 public:
 
-    ClientSubscriberApp(
+    explicit ClientSubscriberApp(
             const CLIParser::client_subscriber_config& config);
 
-    ~ClientSubscriberApp();
+    ~ClientSubscriberApp() override;
 
     //! Subscription callback
     void on_data_available(

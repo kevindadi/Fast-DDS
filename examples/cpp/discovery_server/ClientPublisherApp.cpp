@@ -198,9 +198,9 @@ ClientPublisherApp::ClientPublisherApp(
     // and the suscription is not prepared yet
     wqos.history().depth = 5;
 
-    // Hot update support: Ownership QoS
+    // 热更新支持: Ownership QoS
     wqos.ownership().kind = EXCLUSIVE_OWNERSHIP_QOS;
-    // Set ownership strength (can be overridden via environment variable)
+    // 设置强度 (可以通过环境变量覆盖) 更高的优先链接
     const char* strength_env = std::getenv("PUBLISHER_STRENGTH");
     int strength = strength_env ? std::atoi(strength_env) : 10;
     wqos.ownership_strength().value = strength;

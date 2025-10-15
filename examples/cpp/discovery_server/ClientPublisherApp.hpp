@@ -41,10 +41,10 @@ class ClientPublisherApp : public Application, public DataWriterListener
 {
 public:
 
-    ClientPublisherApp(
+    explicit ClientPublisherApp(
             const CLIParser::client_publisher_config& config);
 
-    ~ClientPublisherApp();
+    ~ClientPublisherApp() override;
 
     //! Publisher matched method
     void on_publication_matched(

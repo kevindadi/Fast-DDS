@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# FastDDS Publisher 热更新脚本
-# 用法: ./hot_update.sh <old_publisher_pid> [new_publisher_binary] [publisher_args...]
+# Usage: ./hot_update.sh <old_publisher_pid> [new_publisher_binary] [publisher_args...]
 
 set -e
 
@@ -31,13 +30,10 @@ if [ ! -f "$NEW_BINARY" ]; then
 fi
 
 echo "=========================================="
-echo "FastDDS Publisher 热更新"
-echo "=========================================="
 echo "旧版本 PID: $OLD_PID"
 echo "新版本: $NEW_BINARY"
 echo ""
 
-# 步骤 1: 启动新版本
 echo "[1/4] 启动新版本 Publisher (优先级=15)..."
 if [ -n "$PUBLISHER_ARGS" ]; then
     echo "Publisher 参数: $PUBLISHER_ARGS"
@@ -48,24 +44,20 @@ fi
 NEW_PID=$!
 echo "新版本 PID: $NEW_PID"
 
-# 步骤 2: 等待新版本连接到 Discovery Server
 echo ""
 echo "[2/4] 等待新版本连接到 Discovery Server (5秒)..."
 sleep 5
 
-# 检查新版本是否正常运行
 if ! ps -p $NEW_PID > /dev/null 2>&1; then
     echo "错误: 新版本启动失败！"
     exit 1
 fi
 echo "新版本运行正常"
 
-# 步骤 3: 发送 SIGTERM 关闭旧版本
 echo ""
 echo "[3/4] 发送 SIGTERM 触发旧版本优雅关闭..."
 kill -TERM $OLD_PID
 
-# 步骤 4: 等待旧版本退出
 echo ""
 echo "[4/4] 等待旧版本完全退出..."
 TIMEOUT=15
@@ -82,12 +74,9 @@ while ps -p $OLD_PID > /dev/null 2>&1; do
 done
 
 echo ""
-echo "=========================================="
-echo "热更新完成！"
-echo "=========================================="
 echo "新版本 PID: $NEW_PID"
 echo "状态文件: /tmp/fastdds_publisher_state.txt"
-echo ""
+echo "=========================================="
 
 # 显示状态文件内容
 if [ -f /tmp/fastdds_publisher_state.txt ]; then
